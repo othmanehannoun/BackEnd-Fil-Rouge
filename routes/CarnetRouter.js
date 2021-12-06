@@ -7,7 +7,7 @@ const { route } = require('./UsersRoute');
 
 router.post('/Carnet', CarnetCtrl.AddCarnet);
 router.get('/carnetbyepicier/:idEpicier', CarnetCtrl.GetCarnetByIdEpicier)
-router.get('/carnetbyclient/:idClient', CarnetCtrl.GetCarnetByIdClient)
+router.get('/carnetbyclient/:randomID', CarnetCtrl.GetCarnetByIdClient)
 router.get('/carnetId/:idC', CarnetCtrl.getCarnetById )
 // router.get('/getcarnet', CarnetCtrl.getCarnet )
 

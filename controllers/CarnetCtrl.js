@@ -17,10 +17,10 @@ const CarnetCtrl = {
 
     AddCarnet: async(req, res)=>{
 
-        const {CarnetName, InfoEpicier, total, idEpicier, idClient} = req.body
+        const {CarnetName, InfoEpicier, total, idEpicier, randomID} = req.body
 
           
-          const user = await User.findOne({_id : idClient})
+          const user = await User.findOne({randomID : randomID})
           if(!user) return res.json({msg: "had khona ramakaynsh almardi."})
 
          const newCarnet = new Carnet({
@@ -28,7 +28,7 @@ const CarnetCtrl = {
             InfoEpicier,
             total,
             idEpicier,
-            idClient
+            randomID
         })
 
 
@@ -74,10 +74,9 @@ const CarnetCtrl = {
 
     GetCarnetByIdClient : async (req, res)=>{
 
-      const id = req.params.idClient;
+      const randomID = req.params.randomID;
 
-      await Carnet.find({idClient:id})
-      
+      await Carnet.find({randomID : randomID})
       .then(carnet=>{ res.json({carnet}) })
       .catch(err=>{ console.log(err) })
 
@@ -96,7 +95,6 @@ const CarnetCtrl = {
       const totalPrice = carnet.total
 
 
-      
       var create_payment_json = {
         "intent": "sale",
         "payer": {

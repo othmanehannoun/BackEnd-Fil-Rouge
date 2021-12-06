@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const validation = require('../middleware/validation')
 const nodemailer = require('nodemailer')
 const { model } = require('mongoose')
+const { response } = require('express')
 // const {cloudinary} = require('../utils/cloudinary');
 
 // app.use(express.json({ limit: '50mb' }));
@@ -14,24 +15,7 @@ const EpicierCtrl = {
 
     // -----1 Register-----  
     register: async (req, res) =>{
-        try {
-
-            // const fileStr = req.body.data;
-            // console.log('uploading Img ...');
-
-            // const uploadedResponse = await cloudinary.uploader.
-            // upload(fileStr,{
-            //     upload_preset: 'sbiya3'
-            // })
-            // console.log(uploadedResponse);
-            // console.log("----------------------------");
-            // console.log("uploadedResponse.secure_url : ",uploadedResponse.secure_url);
-            // const urlUmagePublic = uploadedResponse.secure_url;
-            // console.log("----------------------------");
-            // res.json({msg:"YAYAYAYA"})
-        
-        
-           
+        try {       
 
             console.log(req.body);
             const { error } = validation.registerValidation(req.body);
@@ -73,11 +57,11 @@ const EpicierCtrl = {
 
         try {
             const {email, password} = req.body;
-
             const epicier = await Epicier.findOne({email})
             if(!epicier) return res.json({msg: "Account not found."})
 
             else{
+
                 if(epicier.isValid == false) return res.json({msg:"The account is invalid"})
 
                 const isMatch = await bcrypt.compare(password, epicier.password)
@@ -85,7 +69,6 @@ const EpicierCtrl = {
 
                 // If login success , create access token 
                 const accesstoken = createAccessToken({id: epicier._id})
-            
                 res.json({msg:"You have signed in successfully", epicier, accesstoken})
             }
 
@@ -185,9 +168,7 @@ const EpicierCtrl = {
                         </td></tr>
                         
                         </table>
-                        </div>
-                    
-                   
+                        </div> 
                 `
                 })
 
@@ -196,22 +177,22 @@ const EpicierCtrl = {
     },
 
       // -----3 Count Total Epicier----- 
-    CountEpicier : async(req, res) =>{
+       CountEpicier : async(req, res) =>{
         
-        try{
-            const countEpicierValid = await Epicier.find({isValid: true}).countDocuments();
-            const countEpicierInvalid = await Epicier.find({isValid: false}).countDocuments()
-            res.json({
-                valid : countEpicierValid, 
-                Invalid : countEpicierInvalid
-            })
-        }
+            try{
+                const countEpicierValid = await Epicier.find({isValid: true}).countDocuments();
+                const countEpicierInvalid = await Epicier.find({isValid: false}).countDocuments()
+                res.json({
+                    valid : countEpicierValid, 
+                    Invalid : countEpicierInvalid
+                })
+            }
 
-        catch(err){
-            console.log(err)
-        }
-      
-    },
+            catch(err){
+                console.log(err)
+            }
+        
+        },
 
 
     // -----3 Upfate Epicier----- 
@@ -264,10 +245,101 @@ const EpicierCtrl = {
         res.json({
             message : "User is Signout"
         })
-    }
+    },
+
+
+     // ---4 LogOut Epicier --------
+        SendOtp : async(req, res) => {
+            try{
+                const {email} = req.body
+                const epicier = await Epicier.findOne({email})
+                if(!epicier) return res.json({message: 'Email not Exist'})
+
+                else{ 
+                    
+                    const restPassword = randomPassword(7)
+
+                    // Send Email 
+                    const transport = nodemailer.createTransport({
+                        service: "gmail",
+                            auth: {
+                                user: process.env.EMAIL,  // TODO: your gmail account
+                                pass: process.env.PASSWORD // TODO: your gmail password
+                            }
+                        })
+                    
+                        let info =  transport.sendMail({
+                            from: process.env.EMAIL,
+                            to: epicier.email,
+                            subject: "Rest Password ",
+                            html: ` <p> Bonjour ${epicier.Username} </p> <br> 
+
+                            <p> Veuillez trouver ci-dessous, votre nouveau mot de passe: </p><br>
+                            
+                            <p>  Address Email: ${epicier.email} </p>
+                            <p> Mot de passe: ${restPassword} </p> <br>
+                            
+                            
+                            <p> NB: Nous vous recommandons de changer votre Mot de passe après la connexion </p> 
+                            `
+                        })
+
+                        epicier.restPassword = restPassword
+                        console.log(epicier.restPassword);
+                        const  restPass = await epicier.save();
+
+                        res.json({message:'Send Email Success', epicier});
+                        }
+            }
+            catch(erorr){
+                console.log(error)
+            }
+        },
+
+        changePassword : async (req, res) => {
+        
+
+          const {id, restPassword, newPassword} = req.body
+          const epicier = await Epicier.findById(id)
+
+          const passwordHash = await bcrypt.hash(newPassword, 10)
+
+          if(epicier){
+
+              if(epicier.restPassword !== restPassword){
+                res.send({message : 'Rest Password Incorect'})
+              }
+
+              else{
+                epicier.password = passwordHash
+                epicier.restPassword = ""
+                epicier.save()
+                res.send({message: 'successfully'})
+              }
+
+          }
+
+          else{
+              console.log(error);
+          }
+           
+        },
+    
+
 }
 
 
+function randomPassword(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+//   Mot de passe oublié
+//   Merci de saisir votre adresse mail avec laquelle vous vous etes inscrit à MarocAnnonces.com. Un e-mail vous y sera envoyé avec votre nouveau mot de passe.
 const createAccessToken = (user) =>{
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1d'})
 }

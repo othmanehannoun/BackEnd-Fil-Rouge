@@ -22,8 +22,13 @@ const CarnetSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         require: true
     },
-    idClient : {
-        type: mongoose.Schema.Types.ObjectId,
+    // idClient : {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref : 'users', 
+    //     require: true
+    // },
+    randomID : {
+        type: String,
         ref : 'users', 
         require: true
     },

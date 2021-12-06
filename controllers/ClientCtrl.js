@@ -8,7 +8,7 @@ const userCtrl = {
 
     register: async (req, res) =>{
         try {
-            console.log(req.body);
+            // console.log(req.body);
             const { error } = validation.ClientValidation(req.body);
             if (error) return res.status(400).send(error.details[0].message);
 
@@ -21,6 +21,7 @@ const userCtrl = {
             // Password Encryption
             const passwordHash = await bcrypt.hash(password, 10)
             const newUser = new Users({
+                randomID : randomID(10),
                 last_name,
                 first_name, 
                 email, 
@@ -107,6 +108,15 @@ const userCtrl = {
 }
 
 
+function randomID(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
 
 const createAccessToken = (user) =>{
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1d'})

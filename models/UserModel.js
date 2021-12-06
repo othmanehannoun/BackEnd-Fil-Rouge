@@ -4,6 +4,10 @@ const mongoose = require('mongoose');
 
 
 const userSchema = new mongoose.Schema({
+    randomID:{
+        type: String,
+        require: true
+    },
     last_name:{
         type: String,
         require: true

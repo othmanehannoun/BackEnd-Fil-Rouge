@@ -28,6 +28,10 @@ const epicierSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    restPassword: {
+        type: String,
+        default: ''
+    },
     address:{
         type: String,
         require: true

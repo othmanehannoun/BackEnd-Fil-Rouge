@@ -2,12 +2,16 @@ const mongoose = require('mongoose');
 
 const CarnetSchema = mongoose.Schema({
     
+    type : {
+        type : Boolean,
+        default : true,
+       
+    },
     CarnetName : {
         type : String,
         require : true,
        
     },
-
     InfoEpicier :{
         type :String,
         require: true

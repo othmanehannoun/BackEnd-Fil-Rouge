@@ -66,7 +66,7 @@ const CarnetCtrl = {
 
         const id = req.params.idEpicier;
 
-        await Carnet.find({idEpicier:id})
+        await Carnet.find({idEpicier : id, type : true})
         .then(carnet=>{ res.json({carnet}) })
         .catch(err=>{ console.log(err) })
 
@@ -81,6 +81,21 @@ const CarnetCtrl = {
       .catch(err=>{ console.log(err) })
 
   },
+
+  DeleteCarnet : async(req, res)=>{
+
+    try{
+    const id = req.params.Id_Carnet
+    const  items = {type: false}
+    const option = {new : true}
+    const result = await Carnet.findByIdAndUpdate(id, items, option)
+    res.json({result})
+    }
+    catch(err){
+        console.log(err.message);
+    }
+
+},
 
     // Payment With Paypal 
 
@@ -181,8 +196,7 @@ const CarnetCtrl = {
          
       }
     });
-      
-      
+       
   }
 
   

@@ -1,5 +1,5 @@
 const Payment = require('../models/PaymentModel')
-
+const Carnet = require('../models/CarnetModel')
 
 const PaymentCtrl = {
 
@@ -17,8 +17,17 @@ const PaymentCtrl = {
 
             // Save mongodb
             await newPayment.save()
-       
             res.json({msg: 'successfully', 'Payment' : newPayment})
+
+            const updateTotale = async () =>{
+                const result = await Carnet.findById(idCarnet);
+                console.log(result);
+                result.total -= totalPrice;
+                const done = result.save();
+    
+                console.log(done);
+              }
+              updateTotale()
 
 
         } catch (err) {

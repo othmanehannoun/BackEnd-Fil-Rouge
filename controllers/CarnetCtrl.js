@@ -176,7 +176,7 @@ const CarnetCtrl = {
           })
           const done = newPayment.save()
 
-          const updateTotale =async () =>{
+          const updateTotale = async () =>{
             const result = await Carnet.findById(req.params.IDCarnet);
             console.log(result);
             result.total -= price;
